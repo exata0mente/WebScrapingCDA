@@ -10,6 +10,9 @@
 # u*  - Url
 # e*  - Elementos
 
+rm(list=ls())
+system('docker run -d -p 4445:4444 selenium/standalone-firefox')
+
 # Carregamento de pacotes
 library(RSelenium)
 library(dplyr)
@@ -44,4 +47,18 @@ senha %>%
 remDr$findElement(using = "xpath", value = "//button[@type='button']")$clickElement() # Clique em enviar
 
 
+# Etapa de coleta de dados das obras
+
+oCabecalho <- c("Tipo",
+                 "Artista",
+                 "Título",
+                 "Técnica",
+                 "Dimensões",
+                 "Descrição",
+                 "Avaliação da Obra",
+                 "Data da Pesquisa")
+
+dfObras <- data.frame(matrix(nrow = 0, ncol = length(oCabecalho)))
+
+#usar o lapply
 
