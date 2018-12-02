@@ -10,15 +10,21 @@
 # u*  - Url
 # e*  - Elementos
 
+########## APAGAR ##########
+oUsuario <- "profantonioalbuquerque@gmail.com"
+oSenha <- "flamengo"
+
 rm(list=ls())
 system('docker run -d -p 4445:4444 selenium/standalone-firefox')
 
 # Carregamento de pacotes
 library(RSelenium)
 library(dplyr)
+source("funcoes.R")
 
 # Definição de url base
 uBase <- "http://www.catalogodasartes.com.br/"
+uLogin <-paste0(uBase, "acesso/")
 
 # Etapa de Sessão
 remDr <- remoteDriver(remoteServerAddr = "localhost", 
@@ -26,25 +32,10 @@ remDr <- remoteDriver(remoteServerAddr = "localhost",
                       browserName = "firefox")
 remDr$open()
 
-# Etapa de Login (os dados úteis estão apenas disponíveis para usuários logados)
-
-uLogin <-paste0(uBase, "acesso/")
-remDr$navigate(uLogin)
-
-eFormUsuario <- remDr$findElements(using = "xpath", value = "//input[@id='cliente_email']")
-
-usuario %>% 
-  list() %>% 
-  eFormUsuario[[1]]$sendKeysToElement() # Envia o usuário
-
-
-eFormSenha <- remDr$findElements(using = "xpath", value = "//input[@id='cliente_senha']")
-
-senha %>% 
-  list() %>% 
-  eFormSenha[[1]]$sendKeysToElement() # Envia a senha
-
-remDr$findElement(using = "xpath", value = "//button[@type='button']")$clickElement() # Clique em enviar
+loginCDA(remDr = remDr,
+         usuario = oUsuario,
+         senha = oSenha,
+         url_login = uLogin)
 
 
 # Etapa de coleta de dados das obras

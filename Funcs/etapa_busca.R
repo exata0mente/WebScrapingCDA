@@ -1,14 +1,16 @@
+# Referências Úteis
+  # https://github.com/yusuzech/r-web-scraping-cheat-sheet
+  # https://www.curso-r.com/blog/2017-09-07-pacote-miojo/
+
 rm(list=ls())
 
 library(httr)
 library(rvest)
-library(jsonlite)
 library(dplyr)
 
 
 ## Etapa de Sessão
 url_acesso <- "https://www.catalogodasartes.com.br/inicio"
-
 sessao <- html_session(url_acesso)
 
 ## Carrega os produtos da home page
@@ -55,4 +57,5 @@ for(i in 1:n){
     
 }
 
-write.csv(df_principal, "20181129_listaObrasHome.csv")
+saveRDS(df_principal,"20181201.RDS")
+write.csv(df_principal, "20181201_listaObrasHome.csv")
