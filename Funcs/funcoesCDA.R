@@ -1,6 +1,6 @@
 loginCDA <- function(remDr = NULL,usuario = character(), senha = character(), url_login = character()){
 #' Efetua o login no site catálogo das artes
-#
+#'
 #' Necessário ter uma conexão RSelenium aberta. Recebe dados de acesso (usuário, senha, url)
 #' e estabelece conexão através dos métodos do RSelenium.
 #' 
@@ -33,8 +33,8 @@ pesquisaTextoLivreCDA <- function(remDr = NULL, expressao = character()){
 #' Pesquisa por assunto
 #'
 #' Recebe um string com assunto livre e utiliza a caixa de texto "Pesquisa" para
-#' trazer os cards relacionados ao assunto. Retorna uma lista com os elementos 'card produto'
-#' da primeira página de pesquisa além de métodos para ir as próximas, e anteriores, páginas 
+#' trazer os cards relacionados ao assunto. Retorna o código fonte da página em
+#' que a pesquisa foi realizada.
 #' 
 #' @param remDr objeto remoteDriver
 #' @param expressao texto livre a ser pesquisado
@@ -49,7 +49,6 @@ pesquisaTextoLivreCDA <- function(remDr = NULL, expressao = character()){
   
   remDr$findElement(using = "xpath", value = "//button[@data-action='pesquisar']")$clickElement()
   
-  #eCardProd <- remDr$findElements(using = "xpath", value = "//div[@class='card produto']")
   pageSource <- remDr$getPageSource()
   
   pgFonte <- pageSource[[1]] %>%
@@ -69,7 +68,7 @@ pesquisaTextoLivreCDA <- function(remDr = NULL, expressao = character()){
   
 }
 
-cardParaDataFrameCDA <- function(pgFonte = NULL){
+listDfCardsCDA <- function(pgFonte = NULL){
 #' Extrai as obras de uma página html CDA
 #'
 #' Recebe como argumento o código fonte de uma página CDA
@@ -92,16 +91,45 @@ cardParaDataFrameCDA <- function(pgFonte = NULL){
   eCardProduto <- pgFonte %>% 
     html_nodes(xpath = "//*[@class='card produto']")
   
-  eIdObras <- pgFonte %>%
-    html_nodes(xpath = "//*[@data-id_obra]") %>%
-    html_attr("data-id_obra")
-  
+  # eIdObras <- pgFonte %>%
+  #   html_nodes(xpath = "//*[@data-id_obra]") %>%
+  #   html_attr("data-id_obra")
+  # 
   # Retira um elemento a mais que aparece no código fonte, porém com valor vazio
-  eIdObras <- eIdObras[eIdObras != ""]
+  # eIdObras <- eIdObras[eIdObras != ""]
   
   
-  function(x){
+  eObras <- lapply(eCardProduto, function(x){x %>% 
+      html_nodes(xpath = "div[2]/a/span[@class='tipo']/span[2]|div[@class='card-reveal']/p/span/span")
+    } %>% html_text())
+  
+  cardToDf <- function(x){
+    dfTmp <- x[c(TRUE, FALSE)] %>%
+      t() %>%
+      as.data.frame(stringsAsFactors = FALSE)
     
+    cabTmp <- c("Tipo",x[c(FALSE, TRUE)])
+    cabTmp <- cabTmp[-length(cabTmp)]
+    
+    names(dfTmp) <- cabTmp
+    
+    dfTmp
   }
   
+  lapply(eObras, cardToDf)
+  
+}
+
+mesclaDfsCDA <- function(lista = list()){
+  oCabecalhoTmp <- readRDS("Cabecalhos.RDS")
+  
+  
+  for(i in 1:length(x)){
+    if(!any(oCabecalhoTmp == names(x[i]))){
+      combine(oCabecalhoTmp,names(x[i]))
+      x <- mutate(x, nc = "N/D")
+      names(x) <- oCabecalhoTmp
+    }
+  }
+    
 }
