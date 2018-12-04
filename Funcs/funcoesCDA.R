@@ -140,6 +140,6 @@ listDfCardsCDA <- function(pgFonte = NULL){
     dfTmp
   }
   
-  mapply(cardToDf, eObras,as.list(eUrlObras))
+  mapply(cardToDf, eObras,as.list(eUrlObras)) %>% setNames(eIdObras)
   
 }
