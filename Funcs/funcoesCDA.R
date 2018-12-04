@@ -43,6 +43,7 @@ pesquisaTextoLivreCDA <- function(remDr = NULL, expressao = character()){
 
   eFormPesquisa <- remDr$findElement(using = "xpath", value = "//input[@name='pesquisa']")
   
+  # Efetua clique no botão "Pesquisar"
   expressao %>%
     list() %>%
     eFormPesquisa$sendKeysToElement()
@@ -73,8 +74,8 @@ listDfCardsCDA <- function(pgFonte = NULL){
 #'
 #' Recebe como argumento o código fonte de uma página CDA
 #' possibilitando o uso do pacote rvest para extração dos elementos
-#' relacionados aos cards de produto. Retorna um data frame com
-#' os itens coletados da página (geralmente 16 obras)
+#' relacionados aos cards de produto. Retorna uma lista de data frames
+#' com os itens coletados da página (geralmente 16 obras)
 #' 
 #' @param pgFonte objeto xml com código fonte da página
 #' 
@@ -85,51 +86,60 @@ listDfCardsCDA <- function(pgFonte = NULL){
   # e outras não.
   oCabecalho <- readRDS("Cabecalhos.RDS")
   
+  # Inicialização de um data.frame
   dfObras <- data.frame(matrix(nrow = 0, ncol = length(oCabecalho)))
   names(dfObras) <- oCabecalho
   
+  # Extração dos elementos com a estrutura de dados dos produtos
   eCardProduto <- pgFonte %>% 
     html_nodes(xpath = "//*[@class='card produto']")
   
-  # eIdObras <- pgFonte %>%
-  #   html_nodes(xpath = "//*[@data-id_obra]") %>%
-  #   html_attr("data-id_obra")
-  # 
-  # Retira um elemento a mais que aparece no código fonte, porém com valor vazio
-  # eIdObras <- eIdObras[eIdObras != ""]
+  # Extração dos elementos com os Ids das obras (que não estão aninhados à estrutura dos produtos)
+  eIdObras <- pgFonte %>%
+   html_nodes(xpath = "//*[@data-id_obra]") %>%
+   html_attr("data-id_obra")
   
+  # Extração dos elementos com as urls das obras
+  eUrlObras <- eCardProduto %>% 
+    html_node(xpath = "div/a") %>% 
+    html_attr("href")
+   
+  eIdObras <- eIdObras[eIdObras != ""] # Tratamento de valores inválidos
+  
+  # Extraí para uma lista a estrutura dos produtos contidos nos elementos de cards
+  # aqui temos um vetor onde os índices ímpares são títulos e os pares são conteúdos
   
   eObras <- lapply(eCardProduto, function(x){x %>% 
-      html_nodes(xpath = "div[2]/a/span[@class='tipo']/span[2]|div[@class='card-reveal']/p/span/span")
+      html_nodes(xpath = "div[2]/a/span[@class='tipo']/span[2]|
+                 div[@class='card-reveal']/p/span/span")
     } %>% html_text())
   
-  cardToDf <- function(x){
-    dfTmp <- x[c(TRUE, FALSE)] %>%
+  cardToDf <- function(card,url){
+  #' Organiza os cards em data.frames
+  #' 
+  #' Esta função interna recebe a lista dos elementos dos produtos
+  #' e a lista de urls (que não vêm na estrutura direta dos produtos)
+  #' e organiza um data.frame utilizando os conteúdos de título (índices
+  #' ímpares) em varíaveis e os conteúdos de texto (índices pares) em
+  #' regisitros/observações. Retorna uma lista com os produtos prontos
+  #' para serem parseados em JSON
+  #' 
+  #' @param card lista com os elementos de produtos
+  #' @param url lista com as urls dos produtos
+
+    card[length(card)] <- "Url"
+    card <- c(card, url)
+    
+    dfTmp <- card[c(TRUE, FALSE)] %>%
       t() %>%
       as.data.frame(stringsAsFactors = FALSE)
     
-    cabTmp <- c("Tipo",x[c(FALSE, TRUE)])
-    cabTmp <- cabTmp[-length(cabTmp)]
-    
+    cabTmp <- c("Tipo",card[c(FALSE, TRUE)])
     names(dfTmp) <- cabTmp
     
     dfTmp
   }
   
-  lapply(eObras, cardToDf)
+  mapply(cardToDf, eObras,as.list(eUrlObras))
   
-}
-
-mesclaDfsCDA <- function(lista = list()){
-  oCabecalhoTmp <- readRDS("Cabecalhos.RDS")
-  
-  
-  for(i in 1:length(x)){
-    if(!any(oCabecalhoTmp == names(x[i]))){
-      combine(oCabecalhoTmp,names(x[i]))
-      x <- mutate(x, nc = "N/D")
-      names(x) <- oCabecalhoTmp
-    }
-  }
-    
 }
