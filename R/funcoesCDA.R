@@ -29,7 +29,7 @@ loginCDA <- function(remDr = NULL,usuario = character(), senha = character(), ur
   
 }
 
-contarObrasCDA <- function(remDr = NULL, expressao = character()){
+contarObrasCDA <- function(remDr = NULL, expressao = character(), verbose = TRUE){
 #' Pesquisa por assunto
 #'
 #' Recebe um string com assunto livre e utiliza a caixa de texto "Pesquisa" para
@@ -37,6 +37,7 @@ contarObrasCDA <- function(remDr = NULL, expressao = character()){
 #' 
 #' @param remDr objeto remoteDriver
 #' @param expressao texto livre a ser pesquisado
+#' @param verbose para apresentação de mensagens sobre as quantidades encontradas
 #' 
 #' @export
 
@@ -73,14 +74,17 @@ contarObrasCDA <- function(remDr = NULL, expressao = character()){
     lapply(numeroPaginas) %>% 
     unlist()
   
-  message(paste0("Para o texto ", expressao, 
+  if(verbose){
+    message(paste0("Para o texto ", expressao, 
                  " foram encontradas ", oQntdObras,
                  " obras separadas em ", oPgIndice[2],
                  " páginas"))
-  message(paste0("Lembre-se! Cada página retorna 16 elementos sendo então necessários ",
+    message(paste0("Lembre-se! Cada página retorna 16 elementos sendo então necessários ",
                  oPgIndice[2], " 'cliques'."))
-  message(paste0("Página ", oPgIndice[1], "exportada"))
-  pgFonte
+    message(paste0("Página ", oPgIndice[1], " exportada"))
+  }
+  
+  list(paginas = oPgIndice, obras = oQntdObras)
   
 }
 
@@ -99,11 +103,6 @@ listDfCardsCDA <- function(pgFonte = NULL){
   # Carregamento do cabecalho do último data frame salvo. Este procedimento é necessário
   # devido a uma quantidade de títulos não fixa. Exemplo: há obras com o título Século, Ano, Técnica
   # e outras não.
-  oCabecalho <- readRDS("Cabecalhos.RDS")
-  
-  # Inicialização de um data.frame
-  dfObras <- data.frame(matrix(nrow = 0, ncol = length(oCabecalho)))
-  names(dfObras) <- oCabecalho
   
   # Extração dos elementos com a estrutura de dados dos produtos
   eCardProduto <- pgFonte %>% 
@@ -158,3 +157,54 @@ listDfCardsCDA <- function(pgFonte = NULL){
   mapply(cardToDf, eObras,as.list(eUrlObras)) %>% setNames(eIdObras)
   
 }
+
+minerarObrasFull <- function(remDr = NULL, expressao = character()){
+#' Minera todas as obras conforme expressão de pesquisa
+#' 
+#' A expressão passada por parâmetro é utilizada como texto de pesquisa.
+#' Extraímos as informações de quantidade de obras e páginas e iniciamos
+#' uma mineração página a página salvando o resultado em arquivos RDS.
+#' 
+#' @param remDr objeto remoteDriver
+#' @param expressao texto livre a ser pesquisado
+  
+# Etapa de Pesquisa
+  # Nesta etapa contamos quantas obras e página determinada expressão
+  # retorna.
+  
+  main <- contarObrasCDA(remDr, expressao, verbose = FALSE)
+  
+  # Atribuimos os valores coletados à variáveis que serão
+  # utilizadas como controle
+  
+  pgAtual <- main[[1]][1]
+  pgTotal <- main[[1]][2]
+  pgQntObras <- main[[2]]
+  
+# Etapa de Extração
+  # Nesta etapa acessaremos página a página para a mineração
+  for(i in pgAtual:pgTotal){
+    urlTmp <- gsub(
+      paste0("/",pgAtual,"/"),
+      paste0("/",i,"/"),
+      unlist(remDr$getCurrentUrl()))
+    pgAtual <- i
+    
+    remDr$navigate(urlTmp) # Navega até a página
+    
+    pgSource <- remDr$getPageSource()
+    pgFonte <- pageSource[[1]] %>%
+      read_html()
+    
+    # Extrai os elementos das obras do código fonte da página
+    obrasTmp <- listDfCardsCDA(pgFonte)
+    # Salva-o em um arquivo temporario
+    saveRDS(obrasTmp, file = paste0("obraList", i, ".RDS"))
+    # Espera um tempinho para não dar ban :)
+    sample(60:90, size = 1, replace = TRUE) %>%
+      Sys.sleep()
+  }
+  # Transformo
+  # Carrego
+}
+

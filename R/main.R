@@ -12,7 +12,7 @@ library(rvest)
 library(httr)
 library(dplyr)
 library(jsonlite)
-source("../Funcs/funcoesCDA.R")
+source("../R/funcoesCDA.R")
 
 # Definição de url base
 uBase <- "http://www.catalogodasartes.com.br/"
@@ -33,7 +33,7 @@ navegDriver$navigate(paste0(uBase, "inicio/"))
 
 # Etapa de coleta de dados das obras
 
-pgFonte <- pesquisaTextoLivreCDA(navegDriver, "Abraham Palatnik")
+pgFonte <- contaObrasCDA(navegDriver, "Ernesto de Fiori")
 
 # Etapa de tratamento dos dados
 
