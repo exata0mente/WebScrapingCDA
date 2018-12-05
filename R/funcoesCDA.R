@@ -29,42 +29,57 @@ loginCDA <- function(remDr = NULL,usuario = character(), senha = character(), ur
   
 }
 
-pesquisaTextoLivreCDA <- function(remDr = NULL, expressao = character()){
+contarObrasCDA <- function(remDr = NULL, expressao = character()){
 #' Pesquisa por assunto
 #'
 #' Recebe um string com assunto livre e utiliza a caixa de texto "Pesquisa" para
-#' trazer os cards relacionados ao assunto. Retorna o código fonte da página em
-#' que a pesquisa foi realizada.
+#' contar quantas obras disponíveis há no site.
 #' 
 #' @param remDr objeto remoteDriver
 #' @param expressao texto livre a ser pesquisado
 #' 
 #' @export
 
+  # Manipulação dos elementos para efetuar a pesquisa no navegador
   eFormPesquisa <- remDr$findElement(using = "xpath", value = "//input[@name='pesquisa']")
   
-  # Efetua clique no botão "Pesquisar"
   expressao %>%
     list() %>%
     eFormPesquisa$sendKeysToElement()
   
   remDr$findElement(using = "xpath", value = "//button[@data-action='pesquisar']")$clickElement()
   
+  # Com o código fonte da página resultante será mais fácil coletar os elementos de interesse
   pageSource <- remDr$getPageSource()
-  
   pgFonte <- pageSource[[1]] %>%
     read_html()
   
-  oQntdObras <- pgFonte %>%
-    html_nodes(xpath = "//*[@class='card produto']") %>%
-    length()
+  # Índices de páginas
+  numeroPaginas <- function(x){ 
+    k <- c()
+    for (i in 1:length(x)) {
+      if(x[i] != "") 
+        k <- c(k, x[i])
+    }
+    k
+  }
   
-    
-  message(paste0("Feito! ", oQntdObras, " produto(s) retornado(s)"))
+  h5 <-pgFonte %>% 
+    html_nodes(xpath = "//h5") %>%
+    html_text()
   
-  # Volta para página inicial para que esta função possa ser chamada novamente
-  remDr$navigate(paste0(uBase, "inicio/")) 
+  oQntdObras <- as.numeric(gsub( "\\D+", "", h5[1]))
+  oPgIndice <- strsplit(h5[2], "\\D") %>%
+    lapply(numeroPaginas) %>% 
+    unlist()
   
+  message(paste0("Para o texto ", expressao, 
+                 " foram encontradas ", oQntdObras,
+                 " obras separadas em ", oPgIndice[2],
+                 " páginas"))
+  message(paste0("Lembre-se! Cada página retorna 16 elementos sendo então necessários ",
+                 oPgIndice[2], " 'cliques'."))
+  message(paste0("Página ", oPgIndice[1], "exportada"))
   pgFonte
   
 }
