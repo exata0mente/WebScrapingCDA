@@ -158,7 +158,7 @@ listDfCardsCDA <- function(pgFonte = NULL){
   
 }
 
-minerarObrasFull <- function(remDr = NULL, expressao = character()){
+minerarObrasFull <- function(remDr = NULL, expressao = character(),pagina = NULL, delay = 60:90){
 #' Minera todas as obras conforme expressão de pesquisa
 #' 
 #' A expressão passada por parâmetro é utilizada como texto de pesquisa.
@@ -167,17 +167,29 @@ minerarObrasFull <- function(remDr = NULL, expressao = character()){
 #' 
 #' @param remDr objeto remoteDriver
 #' @param expressao texto livre a ser pesquisado
+#' @param pagina numerico caso queira iniciar a mineração de determinada página
+#' @param delay vetor numérico para definir o tempo entre o acesso a cada página
   
 # Etapa de Pesquisa
   # Nesta etapa contamos quantas obras e página determinada expressão
   # retorna.
   
-  main <- contarObrasCDA(remDr, expressao, verbose = FALSE)
+  main <- contarObrasCDA(remDr, expressao)
   
   # Atribuimos os valores coletados à variáveis que serão
   # utilizadas como controle
   
-  pgAtual <- main[[1]][1]
+  if(!is.null(pagina)){
+    pgAtual <- pagina
+    urlTmp <- gsub(
+      paste0("/",1,"/"),
+      paste0("/",pgAtual,"/"),
+      unlist(remDr$getCurrentUrl()))
+  }
+  else
+    pgAtual <- main[[1]][1]
+    
+  
   pgTotal <- main[[1]][2]
   pgQntObras <- main[[2]]
   
@@ -192,7 +204,7 @@ minerarObrasFull <- function(remDr = NULL, expressao = character()){
     
     remDr$navigate(urlTmp) # Navega até a página
     
-    pgSource <- remDr$getPageSource()
+    pageSource <- remDr$getPageSource()
     pgFonte <- pageSource[[1]] %>%
       read_html()
     
@@ -201,7 +213,7 @@ minerarObrasFull <- function(remDr = NULL, expressao = character()){
     # Salva-o em um arquivo temporario
     saveRDS(obrasTmp, file = paste0("obraList", i, ".RDS"))
     # Espera um tempinho para não dar ban :)
-    sample(60:90, size = 1, replace = TRUE) %>%
+    sample(delay, size = 1, replace = TRUE) %>%
       Sys.sleep()
   }
   # Transformo
