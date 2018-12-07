@@ -240,9 +240,16 @@ mesclaObrasDf <- function(x){
   df_principal
 }
 
-listaObras2csv <- function(arquivosObras = c()){
+listaObras2csv <- function(arquivosObras = list.files()){
+  cab <- readRDS("Cabecalhos.RDS")
+  tam <- length(cab)
+  obrasTotal <- data.frame(matrix(nrow = 0, ncol = tam))
   
-  
-  
-  
+  for(i in 1:length(arquivosObras)){
+    obras <- readRDS(file = arquivosObras[i]) %>% # Lista com os data.frames das obras
+      lapply(mesclaObrasDf) %>%
+      do.call(what = rbind)
+    obrasTotal <- rbind(obrasTotal,obras)
+  }
+  obrasTotal
 }
