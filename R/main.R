@@ -11,7 +11,7 @@ library(RSelenium)
 library(rvest)
 library(httr)
 library(dplyr)
-library(jsonlite)
+#library(jsonlite)
 source("../R/funcoesCDA.R")
 
 # Definição de url base
@@ -33,7 +33,13 @@ navegDriver$navigate(paste0(uBase, "inicio/"))
 
 # Etapa de coleta de dados das obras
 
-minerarObrasFull(navegDriver, "Abraham Palatnik", 1 , 50:90)
+expressao <- "Abraham Palatnik"
 
+minerarObrasFull(navegDriver, expressao, 1 , 30:90)
 
+dfTotal <- listaObras2csv(arquivosObras = list.files(gsub(" ", "", expressao), full.names = TRUE))
 
+write.csv2(x = dfTotal, 
+           file = paste0(gsub(" ", "", expressao), ".csv"),
+           fileEncoding = "UTF-8"
+           )
