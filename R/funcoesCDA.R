@@ -75,13 +75,11 @@ contarObrasCDA <- function(remDr = NULL, expressao = character(), verbose = TRUE
     unlist()
   
   if(verbose){
-    message(paste0("Para o texto ", expressao, 
-                 " foram encontradas ", oQntdObras,
-                 " obras separadas em ", oPgIndice[2],
-                 " páginas"))
-    message(paste0("Lembre-se! Cada página retorna 16 elementos sendo então necessários ",
-                 oPgIndice[2], " 'cliques'."))
-    message(paste0("Página ", oPgIndice[1], " exportada"))
+    message(paste0("Exrpressão: ", expressao, 
+                 "\nQuantidade de Obras: ", oQntdObras,
+                 "\nPáginas: ", oPgIndice[2]
+                 )
+            )
   }
   
   list(paginas = oPgIndice, obras = oQntdObras)
@@ -220,6 +218,7 @@ minerarObrasFull <- function(remDr = NULL, expressao = character(),pagina = NULL
     # Salva-o em um arquivo temporario
     saveRDS(obrasTmp, file = paste0(nomePasta, "/obraList", i, ".RDS"))
     # Espera um tempinho para não dar ban :)
+    message("Página ", i, " minerada! Entrando em delay programado")
     sample(delay, size = 1, replace = TRUE) %>%
       Sys.sleep()
   }
