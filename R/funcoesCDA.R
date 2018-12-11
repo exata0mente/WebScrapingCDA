@@ -246,7 +246,7 @@ mesclaObrasDf <- function(x){
   df_principal
 }
 
-listaObras2csv <- function(arquivosObras = list.files(full.names = TRUE)){
+listaObras2csv <- function(arquivosObras = list.files(full.names = TRUE), trataColunaAglut = TRUE){
   cab <- readRDS("Cabecalhos.RDS")
   tam <- length(cab)
   obrasTotal <- data.frame(matrix(nrow = 0, ncol = tam))
@@ -257,5 +257,33 @@ listaObras2csv <- function(arquivosObras = list.files(full.names = TRUE)){
       do.call(what = rbind)
     obrasTotal <- rbind(obrasTotal,obras)
   }
+  if(trataColunaAglut){
+  ## Separação de colunas aglutinadas
+    ## Preço/m2
+    precosSplit <- obrasTotal$`Preço/m²` %>% 
+      strsplit(split = "[|]") %>%
+      lapply(unlist) %>%
+      do.call(what = rbind) %>%
+      gsub(pattern = "[^0-9,.]", replacement = "")
+    
+    avaliacaoSplit <- obrasTotal$`Avaliação da Obra` %>%
+      strsplit(split = "[:|]") %>%
+      lapply(unlist) %>%
+      do.call(what = rbind)
+    
+    avaliacaoSplit[,2:3] <- avaliacaoSplit[,2:3] %>%
+      gsub(pattern = "[^0-9,.]", replacement = "")
+    
+    obrasTotal <- obrasTotal %>%
+      select(-c("Preço/m²", "Avaliação da Obra")) %>%
+      mutate("Preço/m2(BRL)" = precosSplit[,2],
+             "Preço/m2(USD)" = precosSplit[,2],
+             "Status Lote" = avaliacaoSplit[,1],
+             "Valor(BRL)" = avaliacaoSplit[,2],
+             "Valor(USD)" = avaliacaoSplit[,3]
+    )      
+  }
+  
   obrasTotal
+  
 }
