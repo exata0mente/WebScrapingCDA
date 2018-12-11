@@ -33,7 +33,7 @@ navegDriver$navigate(paste0(uBase, "inicio/"))
 
 # Etapa de coleta de dados das obras
 
-minerarObrasFull(navegDriver, "Tarcíla do Amaral", 1 , 30:70)
+minerarObrasFull(navegDriver, "Abraham Palatnik", 1 , 50:90)
 
 
 

@@ -2,6 +2,15 @@
 
 flukout.github.io - Este site dá uma boa ajuda para entender o CSS Selector, muito utilizado no `html_node`, através de um jogo.
 
+# To do
+
+- [x] Colocar timeout com parâmetro na função `minerarObrasFull`.
+- [x] Colocar mensagens de progresso no processo.
+- [ ] Criar função para extração de apenas uma página.
+- [x] Criar função para converter lista de data frames em um único CSV.
+- [x] Minerar os artistas restantes.
+
+
 # Observações sobre os sites 
 
 ## Catálogo das Artes
