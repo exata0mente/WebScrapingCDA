@@ -25,17 +25,15 @@ navegDriver <- remoteDriver(remoteServerAddr = "localhost",
 navegDriver$open()
 
 loginCDA(remDr = navegDriver,
-         usuario = oUsuario,
-         senha = oSenha,
+         usuario = usuario,
+         senha = senha,
          url_login = uLogin)
 
 navegDriver$navigate(paste0(uBase, "inicio/"))
 
 # Etapa de coleta de dados das obras
 
-pgFonte <- contaObrasCDA(navegDriver, "Ernesto de Fiori")
+minerarObrasFull(navegDriver, "Tarcíla do Amaral", 1 , 30:70)
 
-# Etapa de tratamento dos dados
 
-listDfs <- listDfCardsCDA(pgFonte) ## Este arquivo está compatível com o formato JSON
 

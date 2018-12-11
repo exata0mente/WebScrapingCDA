@@ -193,8 +193,15 @@ minerarObrasFull <- function(remDr = NULL, expressao = character(),pagina = NULL
   pgTotal <- main[[1]][2]
   pgQntObras <- main[[2]]
   
+  nomePasta <- gsub(" ", "", expressao)
+  
+  if(!dir.exists(nomePasta))
+    dir.create(nomePasta)
+  
+  
 # Etapa de Extração
   # Nesta etapa acessaremos página a página para a mineração
+  
   for(i in pgAtual:pgTotal){
     urlTmp <- gsub(
       paste0("/",pgAtual,"/"),
@@ -211,7 +218,7 @@ minerarObrasFull <- function(remDr = NULL, expressao = character(),pagina = NULL
     # Extrai os elementos das obras do código fonte da página
     obrasTmp <- listDfCardsCDA(pgFonte)
     # Salva-o em um arquivo temporario
-    saveRDS(obrasTmp, file = paste0("obraList", i, ".RDS"))
+    saveRDS(obrasTmp, file = paste0(nomePasta, "/obraList", i, ".RDS"))
     # Espera um tempinho para não dar ban :)
     sample(delay, size = 1, replace = TRUE) %>%
       Sys.sleep()
@@ -240,7 +247,7 @@ mesclaObrasDf <- function(x){
   df_principal
 }
 
-listaObras2csv <- function(arquivosObras = list.files()){
+listaObras2csv <- function(arquivosObras = list.files(full.names = TRUE)){
   cab <- readRDS("Cabecalhos.RDS")
   tam <- length(cab)
   obrasTotal <- data.frame(matrix(nrow = 0, ncol = tam))
