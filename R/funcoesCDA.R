@@ -274,9 +274,16 @@ listaObras2csv <- function(arquivosObras = list.files(full.names = TRUE), trataC
     avaliacaoSplit[,2:3] <- avaliacaoSplit[,2:3] %>%
       gsub(pattern = "[^0-9,.]", replacement = "")
     
+    lanceSplit <- obrasTotal$Descrição %>%
+      strsplit(split = " ") %>%
+      lapply(function(x){x[length(x)]}) %>%
+      do.call(what = rbind) %>%
+      gsub(pattern = "[^0-9,.]", replacement = 0)
+    
     obrasTotal <- obrasTotal %>%
       select(-c("Preço/m²", "Avaliação da Obra")) %>%
-      mutate("Preço/m2(BRL)" = precosSplit[,2],
+      mutate("Lance Inicial" = lanceSplit,
+             "Preço/m2(BRL)" = precosSplit[,2],
              "Preço/m2(USD)" = precosSplit[,2],
              "Status Lote" = avaliacaoSplit[,1],
              "Valor(BRL)" = avaliacaoSplit[,2],
