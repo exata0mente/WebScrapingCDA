@@ -12,7 +12,9 @@ library(rvest)
 library(httr)
 library(dplyr)
 #library(jsonlite)
-source("../R/funcoesCDA.R")
+list.files("../R", full.names = TRUE) %>% 
+  as.list() %>% 
+  lapply(source)
 
 # Definição de url base
 uBase <- "http://www.catalogodasartes.com.br/"
