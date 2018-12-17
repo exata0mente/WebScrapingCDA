@@ -12,7 +12,10 @@ library(rvest)
 library(httr)
 library(dplyr)
 #library(jsonlite)
-source("../R/funcoesCDA.R")
+library(stringr)
+list.files("../R", full.names = TRUE) %>% 
+  as.list() %>% 
+  lapply(source)
 
 # Definição de url base
 uBase <- "http://www.catalogodasartes.com.br/"
@@ -33,13 +36,15 @@ navegDriver$navigate(paste0(uBase, "inicio/"))
 
 # Etapa de coleta de dados das obras
 
-expressao <- "Abraham Palatnik"
+expressao <- c("Abraham Palatnik", "Carlito Carvalhosa", "Clovis Graciano", "Di Cavalcante",
+               "Dudu Santos", "Ernesto Di Fiori", "Lasar Segall", "Laura Lima", "Manabu Mabe",
+               "Maria Bonomi", "Rosangela Renno", "Tito De Alencastro", "Volpi")
 
-minerarObrasFull(navegDriver, expressao, 1 , 30:90)
-
-dfTotal <- listaObras2csv(arquivosObras = list.files(gsub(" ", "", expressao), full.names = TRUE))
-
-write.csv2(x = dfTotal, 
-           file = paste0(gsub(" ", "", expressao), ".csv"),
+for(artista in expressao ){
+  #minerarObrasFull(navegDriver, expressao, 1 , 30:90)
+  dfTotal <- listaObras2csv(arquivosObras = list.files(gsub(" ", "", artista), full.names = TRUE))
+  write.csv2(x = dfTotal, 
+           file = paste0(gsub(" ", "", artista), ".csv"),
            fileEncoding = "UTF-8"
            )
+}
