@@ -18,13 +18,31 @@ listaObras2csv <- function(arquivosObras = list.files(full.names = TRUE), trataC
       do.call(what = rbind) %>%
       gsub(pattern = "[^0-9,.]", replacement = "")
     
+    ## Limpa pontuação para facilitar integração
+    precosSplit[,1] <- precosSplit[,1] %>% 
+      gsub(pattern = "[.]", replacement = "")
+    
+    ## Limpa pontuação para facilitar integração
+    precosSplit[,2] <- precosSplit[,2] %>% 
+      gsub(pattern = ",", replacement = "") %>% 
+      gsub(pattern = "[.]", replacement = ",")
+    
     avaliacaoSplit <- obrasTotal$`Avaliação da Obra` %>%
       strsplit(split = "[:|]") %>%
       lapply(unlist) %>%
       do.call(what = rbind)
-    
+  
     avaliacaoSplit[,2:3] <- avaliacaoSplit[,2:3] %>%
       gsub(pattern = "[^0-9,.]", replacement = "")
+    
+    ## Limpa pontuação para facilitar integração
+    avaliacaoSplit[,2] <- avaliacaoSplit[,2] %>%
+      gsub(pattern = "[.]", replacement = "")
+    
+    ## Limpa pontuação para facilitar integração
+    avaliacaoSplit[,3] <- avaliacaoSplit[,3] %>%
+      gsub(pattern = ",", replacement = "") %>%
+      gsub(pattern = "[.]", replacement = ",")
     
     # Limpa lance inicial
     obrasTotal <- obrasTotal %>%
@@ -44,7 +62,7 @@ listaObras2csv <- function(arquivosObras = list.files(full.names = TRUE), trataC
   
     obrasTotal <- obrasTotal %>%
       select(-c("Preço/m²", "Avaliação da Obra")) %>%
-      mutate("Preço/m2(BRL)" = precosSplit[,2],
+      mutate("Preço/m2(BRL)" = precosSplit[,1],
              "Preço/m2(USD)" = precosSplit[,2],
              "Status Lote" = avaliacaoSplit[,1],
              "Valor(BRL)" = avaliacaoSplit[,2],
