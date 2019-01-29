@@ -44,11 +44,16 @@ listaObras2csv <- function(arquivosObras = list.files(full.names = TRUE), trataC
       gsub(pattern = ",", replacement = "") %>%
       gsub(pattern = "[.]", replacement = ",")
     
+    ## Retira o valor final de obras que não foram vendidas
+    
+    indice <- avaliacaoSplit[,1] == "Obra não vendida"
+    avaliacaoSplit[indice,2:3] = 0
+    
     # Limpa lance inicial
     obrasTotal <- obrasTotal %>%
       mutate(`Lance Inicial` = Descrição)
     
-    # Identifica as obras que tenham a string "lance inicial"
+    # Identifica as obras que tenham a string "lance inicial" e gera um vetor lógico
     indice <- obrasTotal$Descrição %>%
       str_detect(pattern = "inicial")
     
