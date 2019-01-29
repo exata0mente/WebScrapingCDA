@@ -11,7 +11,7 @@ library(RSelenium)
 library(rvest)
 library(httr)
 library(dplyr)
-#library(jsonlite)
+library(xlsx)
 library(stringr)
 list.files("../R", full.names = TRUE) %>% 
   as.list() %>% 
@@ -40,11 +40,13 @@ expressao <- c("Abraham Palatnik", "Carlito Carvalhosa", "Clovis Graciano", "Di 
                "Dudu Santos", "Ernesto Di Fiori", "Lasar Segall", "Laura Lima", "Manabu Mabe",
                "Maria Bonomi", "Rosangela Renno", "Tito De Alencastro", "Volpi")
 
-for(artista in expressao ){
-  #minerarObrasFull(navegDriver, expressao, 1 , 30:90)
-  dfTotal <- listaObras2csv(arquivosObras = list.files(gsub(" ", "", artista), full.names = TRUE))
-  write.csv2(x = dfTotal, 
-           file = paste0(gsub(" ", "", artista), ".csv"),
-           fileEncoding = "UTF-8"
-           )
-}
+# for(artista in expressao ){
+#   #minerarObrasFull(navegDriver, expressao, 1 , 30:90)
+#   dfTotal <- listaObras2csv(arquivosObras = list.files(gsub(" ", "", artista), full.names = TRUE))
+#   write.csv2(x = dfTotal, 
+#            file = paste0(gsub(" ", "", artista), ".csv"),
+#            fileEncoding = "UTF-8"
+#            )
+# }
+
+exportaAnalitico(expressao = "Volpi", formato = "xlsx")
